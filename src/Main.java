@@ -6,7 +6,7 @@ import java.util.Scanner;
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    public static void main(String[] args) throws WrongAccount, InvalidTransactionException,InsufficientFundsException,LOL {
+    public static void main(String[] args) throws WrongAccount, InvalidTransactionException, InsufficientFundsException, LOL, InvalidInput {
 
         Bank bank = new Bank();
         boolean exit = false;
@@ -22,25 +22,24 @@ public class Main {
             System.out.println("7. Exit");
             Scanner scanner = new Scanner(System.in);
 
-            int choice = scanner.nextInt();
+            String choice = scanner.nextLine();
 
 
             switch (choice) {
-                case 1:
+                case "1":
                     // Creating an account
+
                     System.out.println("Please enter account holder's name: ");
-                    scanner.nextLine(); // consume newline
                     String accountHolderName = scanner.nextLine();
-
                     String accountNumber;
-                    while (true) {
-                        System.out.println("Input Prefered Account Number");
-                        accountNumber = scanner.nextLine();
-                        if (!bank.IsAccountExist(accountNumber)) {
+                    while (true){
 
+                        System.out.println("Input Prefered Account Number");
+                         accountNumber = scanner.nextLine();
+                        if(!bank.IsAccountExist(accountNumber)){
                             break;
                         }
-                        System.out.println("Account Already Exists");
+                        System.out.println("Acount Already Exist");
                     }
 
                     String accountType;
@@ -48,23 +47,26 @@ public class Main {
 
                             System.out.println("Input Account Type: S-SavingAcccount, C-CurrentAccount");
                             accountType = scanner.nextLine().toLowerCase();
-                            if (accountType.equals("s") || accountType.equals("c")){
-                                if(accountType.equals("s")){
-                                    bank.CreateSavingAccount(accountNumber, accountHolderName);}
-                                else {bank.CreateCurrentAccount(accountNumber, accountHolderName);}
-                                break;
-                            }
 
-                            System.out.println("Wrong Type");
+                                if (accountType.equals("s") || accountType.equals("c")){
+                                    switch (accountType){
+                                        case "s":
+                                            bank.CreateSavingAccount(accountNumber, accountHolderName);
+                                            break;
+                                        case "c":
+                                            bank.CreateCurrentAccount(accountNumber, accountHolderName);
+                                            break;
+                                    }
+
+                                    break;
+                                }
+                                System.out.println("Wrong Type ");
                         }
-
                     System.out.println("Account created successfully for " + accountHolderName);
                     break;
 
-                case 2:
+                case "2":
                     // View account details
-
-                    scanner.nextLine(); // consume newline
                     String accountNumberDetails;
                     while (true) {
 
@@ -79,18 +81,20 @@ public class Main {
                     }
                     break;
 
-                case 3:
+                case "3":
                     // Deposit money
-                    System.out.println("Please enter account number: ");
-                    scanner.nextLine(); // consume newline
-                    String depositAccountNumber = scanner.nextLine();
-                    System.out.println("Please enter the amount to deposit: ");
-                    double depositAmount = scanner.nextDouble();
-                    // Call method to deposit money
-                    System.out.println("Deposited " + depositAmount + " into account " + depositAccountNumber);
+                        System.out.println("Please enter account number: ");
+                        String depositAccountNumber = scanner.nextLine();
+                        System.out.println("Please enter the amount to deposit: ");
+                        double moneyToDeposit = scanner.nextDouble();
+                    try {
+                        bank.DepositMoney(depositAccountNumber, moneyToDeposit);
+                    } catch (InvalidTransactionException e) {}
+                     catch (Exception e) {throw  new RuntimeException();}
+                    System.out.println("Deposited " + moneyToDeposit + " into account " + depositAccountNumber);
                     break;
 
-                case 4:
+                case "4":
                     // Withdraw money
                     System.out.println("Please enter account number: ");
                     scanner.nextLine(); // consume newline
@@ -101,34 +105,27 @@ public class Main {
                     System.out.println("Withdrew " + withdrawAmount + " from account " + withdrawAccountNumber);
                     break;
 
-                case 5:
+                case "5":
                     // Transfer money
                     System.out.println("Please enter source account number: ");
-                    scanner.nextLine(); // consume newline
                     String transferFromAccount = scanner.nextLine();
                     System.out.println("Please enter destination account number: ");
                     String transferToAccount = scanner.nextLine();
                     System.out.println("Please enter the amount to transfer: ");
                     double transferAmount = scanner.nextDouble();
-                    // Call method to transfer money
+                    bank.Transfer(transferFromAccount,transferToAccount,transferAmount);
                     System.out.println("Transferred " + transferAmount + " from account " + transferFromAccount + " to account " + transferToAccount);
                     break;
 
-                case 6:
+                case "6":
                     // Calculate interest for savings account
                     System.out.println("Please enter account number to calculate interest: ");
-                    scanner.nextLine(); // consume newline
-                    String interestAccountNumber = scanner.nextLine();
-                    System.out.println("Please enter the annual interest rate (as percentage): ");
-                    double interestRate = scanner.nextDouble();
-                    System.out.println("Please enter the balance of the account: ");
-                    double balance = scanner.nextDouble();
-                    // Calculate interest
-                    double interest = balance * (interestRate / 100);
-                    System.out.println("The calculated interest is: " + interest);
+
+                    String accNumber = scanner.nextLine();
+                    System.out.println("The calculated interest is: " + bank.CalculateInterest(accNumber));
                     break;
 
-                case 7:
+                case "7":
                     // Exit the program
                     System.out.println("Exiting...");
                     exit = true;

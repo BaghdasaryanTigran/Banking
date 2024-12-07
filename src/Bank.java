@@ -22,11 +22,11 @@ public class Bank implements ITransaction{
 
 
 
-    public boolean CreateCurrentAccount(String accNumber,String userName) {
+    public boolean CreateCurrentAccount(String accNumber,String userName) throws InvalidInput {
 
         CurrentAccount currentAccount = new CurrentAccount(accNumber,userName,0 );
         if(IsAccountExist(accNumber)) {
-            return false;
+           throw new InvalidInput();
         }
         JsonNode node = objectMapper.valueToTree(currentAccount);
         userAccounts.add(node);
@@ -34,11 +34,11 @@ public class Bank implements ITransaction{
         return true;
 
     }
-    public boolean CreateSavingAccount(String accNumber,String userName) {
+    public boolean CreateSavingAccount(String accNumber,String userName) throws InvalidInput {
 
         SavingsAccount savingsAccount = new SavingsAccount(accNumber,userName,0 );
         if(IsAccountExist(accNumber)) {
-            return false;
+           throw new InvalidInput();
         }
         JsonNode node = objectMapper.valueToTree(savingsAccount);
         userAccounts.add(node);
@@ -58,28 +58,36 @@ public class Bank implements ITransaction{
 
     }
     public double CalculateInterest(String accNumber) throws WrongAccount{
-        JsonNode node = GetNode(accNumber);
-        int interestRate = node.get("interestRate").asInt();
 
-        if(interestRate != 0)
-        {
-           return  node.get("balance").asDouble() * interestRate /100;
+        if(!IsAccountExist(accNumber)){
+            throw new WrongAccount();
+        }
+        JsonNode node = GetNode(accNumber);
+        if( node.get("interestRate") == null){
+            throw new WrongAccount();
         }
 
-       throw new WrongAccount();
+        else{
+            return node.get("balance").asDouble() * node.get("interestRate").asInt() / 100;
+        }
+
+
     }
     @Override
     public boolean Transfer(String from, String to, double amount) throws InvalidTransactionException {
-        JsonNode nodeFrom = GetNode(from);
-        JsonNode nodeTo = GetNode(to);
-        int balanceFrom = nodeFrom.get("balance").asInt();
-        int balanceTo = nodeTo.get("balance").asInt();
-        if(IsAccountExist(from) && IsAccountExist(to) && balanceFrom > amount){
-            ((ObjectNode) nodeFrom).put("balance", balanceFrom - amount);
-            ((ObjectNode) nodeTo).put("balance", balanceTo  + amount);
-            JsonUpdate();
-            return true;
-        }
+
+
+            JsonNode nodeFrom = GetNode(from);
+            JsonNode nodeTo = GetNode(to);
+            if(nodeFrom !=null && nodeTo != null){
+                int balanceFrom = nodeFrom.get("balance").asInt();
+                int balanceTo = nodeTo.get("balance").asInt();
+                ((ObjectNode) nodeFrom).put("balance", balanceFrom - amount);
+                ((ObjectNode) nodeTo).put("balance", balanceTo  + amount);
+                JsonUpdate();
+                return true;
+            }
+
         throw new InvalidTransactionException();
     }
     public boolean Withdraw(String accFrom , int withdrawAmount) throws InsufficientFundsException, LOL{
@@ -111,14 +119,16 @@ public class Bank implements ITransaction{
     }
     public JsonNode GetNode(String accNumber)
     {
-        JsonNode node = null;
-        for(JsonNode accountNode : userAccounts){
-            String accountNumbersss = accountNode.get("accountNumber").asText();
-            if(accountNumbersss.equals(accNumber)) {
+       JsonNode node = null;
 
-                node = accountNode;
+            for(JsonNode accountNode : userAccounts){
+                String accountNumbersss = accountNode.get("accountNumber").asText();
+                if(accountNumbersss.equals(accNumber)) {
+
+                    node = accountNode;
+                }
             }
-        }
+
         return node;
     }
     public CurrentAccount GetAccount(String accountNumber)
@@ -127,9 +137,8 @@ public class Bank implements ITransaction{
         JsonNode node = GetNode(accountNumber);
         try {
             acc = objectMapper.treeToValue(node, CurrentAccount.class);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        } catch (JsonProcessingException e) {throw new RuntimeException(e);}
+         catch (Exception e) {throw new RuntimeException();}
 
         return acc;
     }

@@ -16,7 +16,7 @@
 }, {
   "accountNumber" : "21",
   "accountHolderName" : "g",
-  "balance" : 101.0,
+  "balance" : 150000,
   "interestRate" : 9
 }, {
   "accountNumber" : "ghj",
@@ -36,6 +36,11 @@
 }, {
   "accountNumber" : "123",
   "accountHolderName" : "jio",
+  "balance" : 182.0,
+  "overDraftLimit" : -10000
+}, {
+  "accountNumber" : "10",
+  "accountHolderName" : "hb",
   "balance" : 0.0,
   "overDraftLimit" : -10000
 } ]
