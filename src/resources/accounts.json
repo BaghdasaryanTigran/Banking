@@ -1,0 +1,41 @@
+[ {
+  "accountNumber" : "1245",
+  "accountHolderName" : "John Doe",
+  "balance" : 82000.0,
+  "overDraftLimit" : 1
+}, {
+  "accountNumber" : "4125",
+  "accountHolderName" : "a",
+  "balance" : 0.0,
+  "overDraftLimit" : 15
+}, {
+  "accountNumber" : "4521",
+  "accountHolderName" : "g",
+  "balance" : 0.0,
+  "overDraftLimit" : -10000
+}, {
+  "accountNumber" : "21",
+  "accountHolderName" : "g",
+  "balance" : 101.0,
+  "interestRate" : 9
+}, {
+  "accountNumber" : "ghj",
+  "accountHolderName" : "1423",
+  "balance" : 0.0,
+  "interestRate" : 9.0
+}, {
+  "accountNumber" : "452453",
+  "accountHolderName" : "452",
+  "balance" : 0.0,
+  "overDraftLimit" : -10000
+}, {
+  "accountNumber" : "45",
+  "accountHolderName" : "nij",
+  "balance" : 0.0,
+  "overDraftLimit" : -10000
+}, {
+  "accountNumber" : "123",
+  "accountHolderName" : "jio",
+  "balance" : 0.0,
+  "overDraftLimit" : -10000
+} ]
