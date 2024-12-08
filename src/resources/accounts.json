@@ -1,7 +1,7 @@
 [ {
   "accountNumber" : "1245",
   "accountHolderName" : "John Doe",
-  "balance" : 82000.0,
+  "balance" : 82105.0,
   "overDraftLimit" : 1
 }, {
   "accountNumber" : "4125",
@@ -16,7 +16,7 @@
 }, {
   "accountNumber" : "21",
   "accountHolderName" : "g",
-  "balance" : 150000,
+  "balance" : 150018.0,
   "interestRate" : 9
 }, {
   "accountNumber" : "ghj",
@@ -36,7 +36,7 @@
 }, {
   "accountNumber" : "123",
   "accountHolderName" : "jio",
-  "balance" : 182.0,
+  "balance" : 160.69,
   "overDraftLimit" : -10000
 }, {
   "accountNumber" : "10",
