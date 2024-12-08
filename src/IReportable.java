@@ -1,3 +1,3 @@
 public interface IReportable {
-    boolean GenerateReport(String accNumber);
+    String GenerateReport(String accNumber) throws WrongAccount;
 }

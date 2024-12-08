@@ -1,14 +1,9 @@
-import com.google.gson.JsonElement;
-
-import java.awt.*;
-import java.io.FileNotFoundException;
-import java.util.List;
 import java.util.Scanner;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
-    public static void main(String[] args) throws InvalidInput {
+    public static void main(String[] args)  {
 
         Bank bank = new Bank();
         boolean exit = false;
@@ -20,10 +15,10 @@ public class Main {
             System.out.println("3. Deposit Money");
             System.out.println("4. Withdraw Money");
             System.out.println("5. Transfer Money");
-            System.out.println("6. Calculate Interest (Savings Account)");
-            System.out.println("7. Download Account Report");
-
-            System.out.println("8. Exit");
+            System.out.println("6. Get Account Balance");
+            System.out.println("7. Calculate Interest (Savings Account)");
+            System.out.println("8. Download Account Report");
+            System.out.println("9. Exit");
 
             Scanner scanner = new Scanner(System.in);
             String choice = scanner.nextLine();
@@ -33,33 +28,32 @@ public class Main {
                     System.out.println("Please enter account holder's name: ");
                     String accountHolderName = scanner.nextLine();
                     String accountNumber;
-                    while (true){
-                        System.out.println("Input Prefered Account Number");
-                         accountNumber = scanner.nextLine();
-                        if(!bank.IsAccountExist(accountNumber)){
-                            break;
-                        }
-                        System.out.println("Acount Already Exist");
-                    }
 
                     String accountType;
-                        while (true) {
-                            System.out.println("Input Account Type: S-SavingAcccount, C-CurrentAccount");
-                            accountType = scanner.nextLine().toLowerCase();
+                    while (true) {
+                        System.out.println("Input Prefered Account Number");
+                        accountNumber = scanner.nextLine();
+                        System.out.println("Input Account Type: S-SavingAccount, C-CurrentAccount");
+                        accountType = scanner.nextLine().toLowerCase();
 
-                                if (accountType.equals("s") || accountType.equals("c")){
-                                    switch (accountType){
-                                        case "s":
-                                            bank.CreateSavingAccount(accountNumber, accountHolderName);
-                                            break;
-                                        case "c":
-                                            bank.CreateCurrentAccount(accountNumber, accountHolderName);
-                                            break;
-                                    }
-                                    break;
+                        if (accountType.equals("s") || accountType.equals("c")) {
+                            try {
+                                if (accountType.equals("s")) {
+                                    bank.CreateSavingAccount(accountNumber, accountHolderName);
+                                } else {
+                                    bank.CreateCurrentAccount(accountNumber, accountHolderName);
                                 }
-                                System.out.println("Wrong Type ");
+                                break;
+                            } catch (InvalidInput e) {
+                                System.out.println("Account number already exists. Please try again.");
+                            }
+                        }else {
+                            System.out.println("Wrong Type ");
                         }
+
+                    }
+
+
                     System.out.println("Account created successfully for " + accountHolderName);
                     break;
 
@@ -68,11 +62,14 @@ public class Main {
                     while (true) {
                         System.out.println("Please enter account number to view details: ");
                         accountNumberDetails = scanner.nextLine();
-                        if(bank.IsAccountExist(accountNumberDetails)){
-                            System.out.println(bank.GetNode(accountNumberDetails));
+                        try {
+                            System.out.println(bank.GetAccount(accountNumberDetails));
                             break;
+                        }catch (WrongAccount e){
+                            System.out.println("Invalid Account Number");
+                        }catch (Exception e){
+                            System.out.println("An unexpected error occurred. Please try again.");
                         }
-                        System.out.println("Invalid Account Number");
                     }
                     break;
 
@@ -125,12 +122,11 @@ public class Main {
                             break;
                         } catch (InsufficientFundsException e) {
                             System.out.println("Insufficient funds. Please try again.");
-                        } catch (FileNotFoundException e) {
+                        } catch (WrongAccount e) {
                             System.out.println("Account Not Found. Please try again.");
-                        }catch (InvalidAmount e) {
-                                System.out.println("Amount must be greater than 0. Please try again.");
-                            }
-                        catch (Exception e) {
+                        } catch (InvalidAmount e) {
+                            System.out.println("Amount must be greater than 0. Please try again.");
+                        } catch (Exception e) {
                             System.out.println("An unexpected error occurred. Please try again.");
                         }
                     }
@@ -164,33 +160,62 @@ public class Main {
                             break;
                         } catch (InvalidTransactionException e) {
                             System.out.println("Invalid transaction. Please try again.");
-                        } catch (Exception e) {
+                        } catch (InsufficientFundsException e ){
+                            System.out.println("Insufficient Funds");
+                        }
+                        catch (Exception e) {
                             throw new RuntimeException();
                         }
                     }
                     System.out.println("Transferred " + transferAmount + " from account " + transferFromAccount + " to account " + transferToAccount);
                     break;
-
-                case "6":// Calculate interest (Works Only With Saving Ones)
+                case "6"://Get balance
+                    String balanceAccNumber;
+                    while(true){
+                        System.out.println("Input Account Number");
+                        balanceAccNumber = scanner.nextLine();
+                        try {
+                            System.out.println("Balance: " + bank.GetBalance(balanceAccNumber));
+                            break;
+                        } catch (WrongAccount e) {
+                            System.out.println("WrongAccount");
+                        }
+                    }
+                    break;
+                case "7":// Calculate interest (Works Only With Saving Ones)
                     double interestRate;
                     String interestaccNumber;
                     while (true) {
                         System.out.println("Please enter account number to calculate interest:");
                         interestaccNumber = scanner.nextLine();
                         try {
-                           interestRate =  bank.CalculateInterest(interestaccNumber);
+                            interestRate = bank.CalculateInterest(interestaccNumber);
                             System.out.println("Interest calculated successfully.");
                             break;
                         } catch (WrongAccount e) {
                             System.out.println("Wrong Account. Please try again.");
-                        }catch (Exception e){
+                        } catch (Exception e) {
                             throw new RuntimeException();
                         }
                     }
                     System.out.println("The calculated interest is: " + interestRate);
                     break;
-
-                case "8":// Exit the program
+                case "8":
+                    String reportAccNumber;
+                    while (true) {
+                        System.out.println("Please enter account number to view report: ");
+                        reportAccNumber = scanner.nextLine();
+                        try {
+                           System.out.println(bank.GenerateReport(reportAccNumber));
+                            break;
+                        }catch (WrongAccount e){
+                            System.out.println("Invalid Account Number");
+                        }catch (Exception e){
+                           System.out.println("An unexpected error occurred. Please try again.");
+                        }
+                    }
+                    break;
+                case "9":// Exit the program
                     System.out.println("Exiting...");
                     exit = true;
                     break;
@@ -201,16 +226,4 @@ public class Main {
         }
 
     }
-    //    public CurrentAccount GetAccount(String accountNumber) {
-//        CurrentAccount acc = null;
-//        JsonNode node = GetNode(accountNumber);
-//        try {
-//            acc = objectMapper.treeToValue(node, CurrentAccount.class);
-//        } catch (JsonProcessingException e) {throw new RuntimeException(e);}
-//         catch (Exception e) {throw new RuntimeException();}
-//
-//        return acc;
-//    }
-
-
 }

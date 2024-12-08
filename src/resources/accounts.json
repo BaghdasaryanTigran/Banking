@@ -4,43 +4,34 @@
   "balance" : 82105.0,
   "overDraftLimit" : 1
 }, {
-  "accountNumber" : "4125",
-  "accountHolderName" : "a",
-  "balance" : 0.0,
-  "overDraftLimit" : 15
-}, {
   "accountNumber" : "4521",
-  "accountHolderName" : "g",
-  "balance" : 0.0,
+  "accountHolderName" : "Gagik",
+  "balance" : -10000.0,
   "overDraftLimit" : -10000
 }, {
   "accountNumber" : "21",
-  "accountHolderName" : "g",
+  "accountHolderName" : "Gosha",
   "balance" : 150018.0,
   "interestRate" : 9
 }, {
-  "accountNumber" : "ghj",
-  "accountHolderName" : "1423",
-  "balance" : 0.0,
-  "interestRate" : 9.0
-}, {
-  "accountNumber" : "452453",
-  "accountHolderName" : "452",
-  "balance" : 0.0,
-  "overDraftLimit" : -10000
-}, {
-  "accountNumber" : "45",
-  "accountHolderName" : "nij",
-  "balance" : 0.0,
-  "overDraftLimit" : -10000
-}, {
   "accountNumber" : "123",
-  "accountHolderName" : "jio",
-  "balance" : 160.69,
+  "accountHolderName" : "Dio",
+  "balance" : 15200,
   "overDraftLimit" : -10000
 }, {
   "accountNumber" : "10",
   "accountHolderName" : "hb",
   "balance" : 0.0,
   "overDraftLimit" : -10000
-} ]
+}, {
+  "accountNumber" : "212",
+  "accountHolderName" : "Gosha",
+  "balance" : 96508.78,
+  "interestRate" : 9
+}, {
+  "accountNumber" : "84596",
+  "accountHolderName" : "ARtur",
+  "balance" : 148850.0,
+  "interestRate" : 9.0
+}
+]

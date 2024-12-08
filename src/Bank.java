@@ -1,3 +1,4 @@
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -7,12 +8,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 
 
-public class Bank implements ITransaction{
+public class Bank implements ITransaction, IReportable{
     private ArrayNode userAccounts;
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String path = "src/resources/accounts.json";
-    private final File jsonFile = new File(path);
-
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private String path = "src/resources/accounts.json";
+    private File jsonFile = new File(path);
 
 
     public void CreateCurrentAccount(String accNumber,String userName) throws InvalidInput {
@@ -59,26 +59,24 @@ public class Bank implements ITransaction{
     }
 
     @Override
-    public void Transfer(String from, String to, double amount) throws InvalidTransactionException {
+    public void Transfer(String from, String to, double amount) throws InvalidTransactionException, InvalidAmount, InsufficientFundsException, FileNotFoundException, WrongAccount {
             JsonNode nodeFrom = GetNode(from);
             JsonNode nodeTo = GetNode(to);
             if(nodeFrom !=null && nodeTo != null && amount > 0){
-                int balanceFrom = nodeFrom.get("balance").asInt();
-                int balanceTo = nodeTo.get("balance").asInt();
-                ((ObjectNode) nodeFrom).put("balance", balanceFrom - amount);
-                ((ObjectNode) nodeTo).put("balance", balanceTo  + amount);
+                Withdraw(from,amount);
+                DepositMoney(to,amount);
                 JsonUpdate();
                 return;
             }
         throw new InvalidTransactionException();
     }
 
-    public void Withdraw(String accFrom , double withdrawAmount) throws InsufficientFundsException, FileNotFoundException, InvalidAmount {
+    public void Withdraw(String accFrom , double withdrawAmount) throws InsufficientFundsException, InvalidAmount, WrongAccount {
         JsonNode node = GetNode(accFrom);
         if(node == null){
-            throw new FileNotFoundException();
+            throw new WrongAccount();
         }
-        if(WithdrawPossibility( accFrom, withdrawAmount)) {
+        if(WithdrawPossibility(node, withdrawAmount)) {
             double newBalance = GetBalance(accFrom);
             ((ObjectNode) node).put("balance", newBalance - withdrawAmount);
             JsonUpdate();
@@ -87,17 +85,40 @@ public class Bank implements ITransaction{
         throw new UnknownError();
     }
 
-    private boolean WithdrawPossibility(String accfrom, double money) throws InsufficientFundsException, InvalidAmount {
+    private boolean WithdrawPossibility(JsonNode node, double money) throws InsufficientFundsException, InvalidAmount {
         if(money <= 0)
         {
             throw new InvalidAmount();
         }
-        if ( GetBalance(accfrom)- money >= 0) {
+        if(node.has("overDraftLimit")){
+            if(node.get("balance").asInt() - money >= node.get("overDraftLimit").asInt()){
+                return true;
+            }
+        }
+        if ( node.get("balance").asInt()- money >= 0) {
             return true;
         }
         throw new InsufficientFundsException();
     }
+        public String GetAccount(String accountNumber) throws WrongAccount {
+        UserAccountInfo acc;
+        JsonNode node = GetNode(accountNumber);
+            if (node == null) {
+                throw new WrongAccount();
+            }
 
+            try {
+                acc = objectMapper.treeToValue(node, UserAccountInfo.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            String info = String.format("Account Number: %s\nAccount Holder: %s\nBalance: $%.2f",
+                    acc.getAccountNumber(),
+                    acc.getAccountHolderName(),
+                    acc.getBalance());
+
+            return info;
+    }
     public JsonNode GetNode(String accNumber) {
        JsonNode node = null;
 
@@ -112,10 +133,12 @@ public class Bank implements ITransaction{
         return node;
     }
 
-    public double GetBalance(String accountNumber){
-        JsonNode node  = GetNode(accountNumber);
-        double balance = node.get("balance").asInt();
-        return balance;
+    public double GetBalance(String accountNumber) throws WrongAccount {
+        if(IsAccountExist(accountNumber)){
+            JsonNode node  = GetNode(accountNumber);
+            return node.get("balance").asDouble();
+        }
+        throw new WrongAccount();
     }
 
     public boolean IsAccountExist(String accountNumber) {
@@ -149,5 +172,34 @@ public class Bank implements ITransaction{
         ReadAccountsInfo();
     }
 
+
+    @Override
+    public String GenerateReport(String accNumber) throws WrongAccount {
+        JsonNode node = GetNode(accNumber);
+        if (node == null) {
+            throw new WrongAccount();
+        }
+
+        String accountNumber = node.get("accountNumber").asText();
+        String accountHolder = node.get("accountHolderName").asText();
+        double balance = node.get("balance").asDouble();
+        double interestRate = node.has("interestRate") ? node.get("interestRate").asDouble() : 0.0;
+        double overdraftLimit = node.has("overDraftLimit") ? node.get("overDraftLimit").asDouble() : 0.0;
+
+        StringBuilder reportBuilder = new StringBuilder();
+        reportBuilder.append(String.format("\nAccount Number:" + accountNumber));
+        reportBuilder.append(String.format("\nAccount Holder: " +  accountHolder));
+        reportBuilder.append(String.format("\nBalance: " + balance));
+
+        if (interestRate > 0.0) {
+            reportBuilder.append(String.format("\nInterest Rate:" + interestRate));
+        }
+        if (overdraftLimit < 0) {
+            reportBuilder.append(String.format("\nOverdraft Limit:" + overdraftLimit));
+        }
+
+        return reportBuilder.toString();
+
+    }
 
 }
